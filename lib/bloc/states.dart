@@ -11,3 +11,4 @@ class UnselectableDaysState extends BlocStates {}
 class GetEventsForDayState extends BlocStates {}
 class GetHijriDateState extends BlocStates {}
 class GetArabicMonthNameState extends BlocStates {}
+class ChangeDateDetailsState extends BlocStates {}

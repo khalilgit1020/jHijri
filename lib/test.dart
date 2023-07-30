@@ -1,44 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hijr/api/Api_Services.dart';
 import 'package:hijr/bloc/home_cubit.dart';
 import 'package:hijr/bloc/states.dart';
+import 'package:hijr/second_Screen.dart';
 import 'package:hijri/hijri_calendar.dart';
+
 // ignore: depend_on_referenced_packages
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-// ignore: depend_on_referenced_packages
-import 'package:intl/date_symbol_data_local.dart';
 
 import '../utils.dart';
 
-class TableComplexExample extends StatefulWidget {
-  const TableComplexExample({super.key});
+class TableComplex extends StatefulWidget {
+  const TableComplex({super.key});
 
   @override
   // ignore: library_private_types_in_public_api
-  _TableComplexExampleState createState() => _TableComplexExampleState();
+  _TableComplexState createState() => _TableComplexState();
 }
 
-class _TableComplexExampleState extends State<TableComplexExample> {
-
+class _TableComplexState extends State<TableComplex> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => HomeCubit(),
+      create: (context) => HomeCubit()..changeUnSelected(),
       child: BlocConsumer<HomeCubit, BlocStates>(
         listener: (context, state) {},
         builder: (context, state) {
           var cubit = HomeCubit.get(context);
           return Scaffold(
             body: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ValueListenableBuilder<DateTime>(
                     valueListenable: cubit.focusedDay,
                     builder: (context, value, _) {
                       return _CalendarHeader(
+                        cubit: cubit,
                         year: cubit.getHijriDateYear(cubit.selectedDay),
                         month: cubit.getHijriDateMonth(cubit.selectedDay),
                         focusedDay: value,
@@ -47,28 +48,27 @@ class _TableComplexExampleState extends State<TableComplexExample> {
                         },
                         onLeftArrowTap: () {
                           cubit.pageController.previousPage(
-                            duration:const Duration(milliseconds: 300),
+                            duration: const Duration(milliseconds: 300),
                             curve: Curves.easeOut,
                           );
                         },
                         onRightArrowTap: () {
                           cubit.pageController.nextPage(
-                            duration:const Duration(milliseconds: 300),
+                            duration: const Duration(milliseconds: 300),
                             curve: Curves.easeOut,
                           );
                         },
-
                       );
                     },
                   ),
                   TableCalendar<Event>(
-                    onCalendarCreated: (controller) => cubit.pageController = controller,
+                    onCalendarCreated: (controller) =>
+                        cubit.pageController = controller,
                     headerVisible: false,
-
-                    enabledDayPredicate: (DateTime dateTime){
-                      if (cubit.unselectableDays.contains(DateTime(dateTime.year,dateTime.month,dateTime.day))) {
+                    enabledDayPredicate: (DateTime dateTime) {
+                      if (cubit.unselectableDays.contains('${dateTime.year}-0${dateTime.month}-${dateTime.day}')) {
                         return false;
-                      }else{
+                      } else {
                         return true;
                       }
                     },
@@ -78,72 +78,86 @@ class _TableComplexExampleState extends State<TableComplexExample> {
                     lastDay: kLastDay,
                     daysOfWeekHeight: 25,
                     selectedDayPredicate: (day) {
-                      return cubit.isSameDay(day);
+                      return isSameDay(cubit.selectedDay, day);
                     },
-
                     onDaySelected: cubit.onDaySelected,
                     locale: 'ar',
-                    onPageChanged: (focusedDay) => cubit.focusedDay.value = focusedDay,
+                    onPageChanged: (focusedDay) =>
+                        cubit.focusedDay.value = focusedDay,
                     availableGestures: AvailableGestures.horizontalSwipe,
-                    headerStyle:const HeaderStyle(
+                    headerStyle: const HeaderStyle(
                       formatButtonVisible: true,
                     ),
-                    daysOfWeekStyle:const DaysOfWeekStyle(
+                    daysOfWeekStyle: const DaysOfWeekStyle(
                       weekendStyle: TextStyle(color: Colors.red),
                     ),
                     calendarBuilders: CalendarBuilders(
                       disabledBuilder: (context, day, _) {
-                        return Center(
-                          child: Text(
-                            day.day.toString(),
-                            style:const TextStyle(color: Colors.grey,fontSize: 12),
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 18),
+                          decoration: const BoxDecoration(
+                            color: Colors.grey,
+                            shape: BoxShape.circle,
                           ),
-
+                          child: Padding(
+                            padding: const EdgeInsets.all(8),
+                            child: Text(
+                              day.day.toString(),
+                              style: const TextStyle(color: Colors.white),
+                              //textAlign: TextAlign.center,
+                            ),
+                          ),
                         );
                       },
                       selectedBuilder: (BuildContext, day, DateToday) {
                         HijriCalendar hijriDay = HijriCalendar.fromDate(day);
-                        String hijriMonth =
-                        cubit.getArabicMonthName(HijriCalendar.fromDate(day).hMonth);
+                        String hijriMonth = cubit.getArabicMonthName(
+                            HijriCalendar.fromDate(day).hMonth);
+
+                        //cubit.day = hijriDay.hDay.toString();
+                        //cubit.month = hijriMonth;
+                        //cubit.year = hijriDay.hYear.toString();
+                        cubit.changeDate(hijriDay.hDay.toString(), hijriMonth, hijriDay.hYear.toString(),);
+
                         return Container(
-                          margin:const EdgeInsets.only(bottom: 2),
-                          decoration:const BoxDecoration(
-                            color: Colors.red,
+                          margin: const EdgeInsets.only(bottom: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade400,
                             shape: BoxShape.circle,
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Column(
-                              children: [
-                                Text(day.day.toString()),
-                                Text(
-                                  hijriDay.hDay == 1
-                                      ? hijriMonth.toString().toString()
-                                      : hijriDay.hDay.toString(),
-                                  style:const TextStyle(fontSize: 8, color: Colors.black),
-                                ),
-                              ],
-                            ),
+                          child: Column(
+                            children: [
+                              Text(day.day.toString()),
+                              Text(
+                                hijriDay.hDay == 1
+                                    ? hijriMonth.toString().toString()
+                                    : hijriDay.hDay.toString(),
+                                style: const TextStyle(
+                                    fontSize: 5, color: Colors.black),
+                              ),
+                            ],
                           ),
                         );
                       },
                       todayBuilder: (BuildContext, day, DateToday) {
                         HijriCalendar hijriDay = HijriCalendar.fromDate(day);
-                        String hijriMonth =
-                        cubit.getArabicMonthName(HijriCalendar.fromDate(day).hMonth);
+                        String hijriMonth = cubit.getArabicMonthName(
+                            HijriCalendar.fromDate(day).hMonth);
                         return Container(
-                          margin:const EdgeInsets.only(bottom: 10),
+                          margin: const EdgeInsets.only(bottom: 2),
                           child: Padding(
-                            padding: const EdgeInsets.all(7.0),
+                            padding: const EdgeInsets.all(10.0),
                             child: Column(
                               children: [
                                 Text(day.day.toString()),
                                 Text(
                                   hijriDay.hDay == 1
-                                      ? hijriMonth.toString().toString()
+                                      ? hijriMonth.toString()
                                       : hijriDay.hDay.toString(),
-                                  style:
-                                  const TextStyle(fontSize: 8, color: Colors.black45),
+                                  style: const TextStyle(
+                                      fontSize: 8, color: Colors.black45),
                                 ),
                               ],
                             ),
@@ -152,10 +166,10 @@ class _TableComplexExampleState extends State<TableComplexExample> {
                       },
                       defaultBuilder: (BuildContext, day, DateToday) {
                         HijriCalendar hijriDay = HijriCalendar.fromDate(day);
-                        String hijriMonth =
-                        cubit.getArabicMonthName(HijriCalendar.fromDate(day).hMonth);
+                        String hijriMonth = cubit.getArabicMonthName(
+                            HijriCalendar.fromDate(day).hMonth);
                         return Container(
-                          margin:const EdgeInsets.only(bottom: 2),
+                          margin: const EdgeInsets.only(bottom: 2),
                           child: Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: Column(
@@ -165,7 +179,8 @@ class _TableComplexExampleState extends State<TableComplexExample> {
                                   hijriDay.hDay == 1
                                       ? hijriMonth.toString().toString()
                                       : hijriDay.hDay.toString(),
-                                  style:const TextStyle(fontSize: 7, color: Colors.grey),
+                                  style: const TextStyle(
+                                      fontSize: 6, color: Colors.grey),
                                 ),
                               ],
                             ),
@@ -174,26 +189,40 @@ class _TableComplexExampleState extends State<TableComplexExample> {
                       },
                     ),
                   ),
-                  ElevatedButton(onPressed:(){
-                    print(cubit.selectedDay);
-                  },
-                    child:const Text('send'),
+                  const SizedBox(
+                    height: 20,
                   ),
-                  /*Center(
-                    child: Column(
-                      children: [
-                        Text(
-                          ' Date: ${cubit.selectedDay.toLocal()}',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Selected Hijri Date: ${cubit.getHijriDateYear(cubit.selectedDay)}',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ],
+                  ElevatedButton(
+                    onPressed: () {
+
+                      // change hijri date
+                      cubit.unselectableDays.add(DateTime(
+                        cubit.selectedDay.year,
+                        cubit.selectedDay.month,
+                        cubit.selectedDay.day,
+                      ));
+
+                      // post data
+                      ApiService().postDataToApi(
+                        data: {
+                          "hall_id": 600001,
+                          "customer_id": 1,
+                          "booking_date": DateTime(cubit.selectedDay.year,
+                            cubit.selectedDay.month,
+                            cubit.selectedDay.day,).toString(),
+                        }
+                      );
+
+                      // change un available dates
+                      cubit.changeUnSelected();
+
+                      Navigator.of(context).push(MaterialPageRoute(builder: (_)=>const SecondScreen()));
+
+                    },
+                    child: Text(
+                      'حجز بتاريخ ${cubit.day} ${cubit.month}, ${cubit.year}',
                     ),
-                  )*/
+                  ),
                 ],
               ),
             ),
@@ -209,30 +238,37 @@ class _CalendarHeader extends StatelessWidget {
   final VoidCallback onLeftArrowTap;
   final VoidCallback onRightArrowTap;
   final VoidCallback onTodayButtonTap;
-final String year;
+  final String year;
   final String month;
+  final HomeCubit cubit;
+
   const _CalendarHeader({
     Key? key,
     required this.focusedDay,
     required this.onLeftArrowTap,
     required this.onRightArrowTap,
     required this.onTodayButtonTap,
-    required this.year, required this.month,
+    required this.year,
+    required this.month,
+    required this.cubit,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final headerText = DateFormat.yMMM().format(focusedDay);
+    final headerText = DateFormat.y().format(focusedDay);
+    final headerText2 = cubit.getMonthName(focusedDay.month);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          const SizedBox(width: 8,),
+          const SizedBox(
+            width: 8,
+          ),
           Column(
             children: [
               IconButton(
-                icon:const Icon(Icons.calendar_today,
+                icon: const Icon(Icons.calendar_today,
                     size: 24.0, color: Colors.grey),
                 visualDensity: VisualDensity.compact,
                 onPressed: onTodayButtonTap,
@@ -244,34 +280,50 @@ final String year;
             ],
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
             child: Column(
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const SizedBox(width: 8.0),
+                    //const SizedBox(width: 8.0),
 
                     IconButton(
-                      icon:const Icon(Icons.chevron_left),
+                      icon: const Icon(Icons.chevron_left),
                       onPressed: onLeftArrowTap,
                     ),
                     SizedBox(
-                      width: 100.0,
-                      child: Text(
-                        headerText,
-                        style:const TextStyle(fontSize: 22.0),
+                      width: 110.0,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            headerText,
+                            style: TextStyle(
+                                fontSize: 14.0, color: Colors.green.shade500),
+                          ),
+                          const SizedBox(
+                            width: 4,
+                          ),
+                          Text(
+                            headerText2,
+                            style: const TextStyle(fontSize: 14.0),
+                          )
+                        ],
                       ),
                     ),
                     IconButton(
-                      icon:const Icon(Icons.chevron_right),
+                      icon: const Icon(Icons.chevron_right),
                       onPressed: onRightArrowTap,
                     ),
                   ],
                 ),
                 Text(
                   "$month $year ",
-                  style:const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w500, color: Colors.grey),
+                  style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey),
                 )
               ],
             ),

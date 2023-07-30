@@ -6,6 +6,7 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import '../api/Api_Services.dart';
 import '../utils.dart';
 
 class HomeCubit extends Cubit<BlocStates> {
@@ -17,6 +18,16 @@ class HomeCubit extends Cubit<BlocStates> {
   final ValueNotifier<DateTime> focusedDay = ValueNotifier(DateTime.now());
   DateTime selectedDay = DateTime.now();
 
+  String month ='';
+  String day ='';
+  String year = '';
+
+  changeDate(d,m,y){
+    day = d;
+    month = m;
+    year = y;
+    //emit(ChangeDateDetailsState());
+  }
 
   late PageController pageController;
   final CalendarFormat calendarFormat = CalendarFormat.month;
@@ -57,14 +68,13 @@ class HomeCubit extends Cubit<BlocStates> {
   }
 
 
-  List<DateTime> unselectableDays = [
-    DateTime(2023, 7, 2),
-    DateTime(2023, 7, 8),
-    // Add more unselectable days as needed
-  ];
+  List<dynamic> unselectableDays = [];
 
-  void changeUnSelected(List<DateTime> list) {
-    unselectableDays  = list;
+  void changeUnSelected()async {
+    unselectableDays.clear();
+    print('${unselectableDays} 999');
+    unselectableDays  = await ApiService().fetchDataFromApi();
+    print('${unselectableDays} 888');
     emit(UnselectableDaysState());
 
   }
@@ -92,7 +102,7 @@ class HomeCubit extends Cubit<BlocStates> {
 
   String getArabicMonthName(int monthNumber) {
     List<String> arabicMonthNames = [
-      "المحرم",
+      "محرم",
       "صفر",
       "ربيع الأول",
       "ربيع الآخر",
@@ -109,6 +119,27 @@ class HomeCubit extends Cubit<BlocStates> {
    // emit(GetArabicMonthNameState());
     return arabicMonthNames[monthNumber - 1];
   }
+
+  String getMonthName(int monthNumber) {
+    List<String> arabicMonthNames = [
+      "يناير",
+      "فبراير",
+      "مارس",
+      "ابريل",
+      "مايو",
+      "يونيو",
+      "يوليو",
+      "اغسطس",
+      "سبتمبر",
+      "اكتوبر",
+      "نوفمبر",
+      "ديسمر",
+    ];
+
+    // emit(GetArabicMonthNameState());
+    return arabicMonthNames[monthNumber - 1];
+  }
+
 
 
 }

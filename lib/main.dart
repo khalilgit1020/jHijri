@@ -3,15 +3,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hijr/bloc/states.dart';
 import 'package:hijr/test.dart';
 
+import 'api/Api_Services.dart';
 import 'bloc/bloc_observer.dart';
 import 'bloc/home_cubit.dart';
 
 void main() {
 
+  //ApiService().fetchDataFromApi();
+
   BlocOverrides.runZoned(
         () {
       // Use cubits...
-      runApp(MyApp());
+      runApp(const MyApp());
     },
     blocObserver: SimpleBlocObserver(),
   );
@@ -24,7 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return  BlocProvider(
-      create: (context) => HomeCubit()..initState(),
+      create: (context) => HomeCubit()..initState()..changeUnSelected(),
       child: BlocConsumer<HomeCubit, BlocStates>(
         listener: (context, state) {},
         builder: (context, state) {
@@ -34,7 +37,7 @@ class MyApp extends StatelessWidget {
             theme: ThemeData(
               primarySwatch: Colors.blue,
             ),
-            home:const TableComplexExample(),
+            home:const TableComplex(),
           );
         },
       ),
