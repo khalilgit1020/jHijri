@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' as m;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hijr/api/Api_Services.dart';
@@ -61,132 +62,147 @@ class _TableComplexState extends State<TableComplex> {
                       );
                     },
                   ),
-                  TableCalendar<Event>(
-                    onCalendarCreated: (controller) =>
-                        cubit.pageController = controller,
-                    headerVisible: false,
-                    enabledDayPredicate: (DateTime dateTime) {
-                      if (cubit.unselectableDays.contains('${dateTime.year}-0${dateTime.month}-${dateTime.day}')) {
-                        return false;
-                      } else {
-                        return true;
-                      }
-                    },
-                    calendarFormat: cubit.calendarFormat,
-                    focusedDay: cubit.focusedDay.value,
-                    firstDay: kFirstDay,
-                    lastDay: kLastDay,
-                    daysOfWeekHeight: 25,
-                    selectedDayPredicate: (day) {
-                      return isSameDay(cubit.selectedDay, day);
-                    },
-                    onDaySelected: cubit.onDaySelected,
-                    locale: 'ar',
-                    onPageChanged: (focusedDay) =>
-                        cubit.focusedDay.value = focusedDay,
-                    availableGestures: AvailableGestures.horizontalSwipe,
-                    headerStyle: const HeaderStyle(
-                      formatButtonVisible: true,
-                    ),
-                    daysOfWeekStyle: const DaysOfWeekStyle(
-                      weekendStyle: TextStyle(color: Colors.red),
-                    ),
-                    calendarBuilders: CalendarBuilders(
-                      disabledBuilder: (context, day, _) {
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 18),
-                          decoration: const BoxDecoration(
-                            color: Colors.grey,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8),
-                            child: Text(
-                              day.day.toString(),
-                              style: const TextStyle(color: Colors.white),
-                              //textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
+                  m.Directionality(
+                    textDirection: m.TextDirection.rtl,
+                    child: TableCalendar<Event>(
+                      onCalendarCreated: (controller) =>
+                      cubit.pageController = controller,
+                      headerVisible: false,
+                      enabledDayPredicate: (DateTime dateTime) {
+                        if (cubit.unselectableDays.contains('${dateTime.year}-0${dateTime.month}-${dateTime.day}')) {
+                          return false;
+                        } else {
+                          return true;
+                        }
                       },
-                      selectedBuilder: (BuildContext, day, DateToday) {
-                        HijriCalendar hijriDay = HijriCalendar.fromDate(day);
-                        String hijriMonth = cubit.getArabicMonthName(
-                            HijriCalendar.fromDate(day).hMonth);
-
-                        //cubit.day = hijriDay.hDay.toString();
-                        //cubit.month = hijriMonth;
-                        //cubit.year = hijriDay.hYear.toString();
-                        cubit.changeDate(hijriDay.hDay.toString(), hijriMonth, hijriDay.hYear.toString(),);
-
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 4),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 10),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade400,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Column(
-                            children: [
-                              Text(day.day.toString()),
-                              Text(
-                                hijriDay.hDay == 1
-                                    ? hijriMonth.toString().toString()
-                                    : hijriDay.hDay.toString(),
-                                style: const TextStyle(
-                                    fontSize: 5, color: Colors.black),
+                      calendarFormat: cubit.calendarFormat,
+                      focusedDay: cubit.focusedDay.value,
+                      firstDay: kFirstDay,
+                      lastDay: kLastDay,
+                      startingDayOfWeek: StartingDayOfWeek.saturday,
+                      daysOfWeekHeight: 25,
+                      selectedDayPredicate: (day) {
+                        return isSameDay(cubit.selectedDay, day);
+                      },
+                      onDaySelected: cubit.onDaySelected,
+                      locale: 'ar',
+                      onPageChanged: (focusedDay) =>
+                      cubit.focusedDay.value = focusedDay,
+                      availableGestures: AvailableGestures.horizontalSwipe,
+                      headerStyle: const HeaderStyle(
+                        formatButtonVisible: true,
+                      ),
+                      daysOfWeekStyle: const DaysOfWeekStyle(
+                        weekendStyle: TextStyle(color: Colors.red),
+                      ),
+                      calendarBuilders: CalendarBuilders(
+                        disabledBuilder: (context, day, _) {
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 18),
+                            decoration: const BoxDecoration(
+                              color: Colors.grey,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                day.day.toString(),
+                                style: const TextStyle(color: Colors.white),
+                                //textAlign: TextAlign.center,
                               ),
-                            ],
-                          ),
-                        );
-                      },
-                      todayBuilder: (BuildContext, day, DateToday) {
-                        HijriCalendar hijriDay = HijriCalendar.fromDate(day);
-                        String hijriMonth = cubit.getArabicMonthName(
-                            HijriCalendar.fromDate(day).hMonth);
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 2),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
-                            child: Column(
-                              children: [
-                                Text(day.day.toString()),
-                                Text(
-                                  hijriDay.hDay == 1
-                                      ? hijriMonth.toString()
-                                      : hijriDay.hDay.toString(),
-                                  style: const TextStyle(
-                                      fontSize: 8, color: Colors.black45),
-                                ),
-                              ],
                             ),
-                          ),
-                        );
-                      },
-                      defaultBuilder: (BuildContext, day, DateToday) {
-                        HijriCalendar hijriDay = HijriCalendar.fromDate(day);
-                        String hijriMonth = cubit.getArabicMonthName(
-                            HijriCalendar.fromDate(day).hMonth);
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 2),
-                          child: Padding(
-                            padding: const EdgeInsets.all(10.0),
+                          );
+                        },
+                        selectedBuilder: (BuildContext, day, DateToday) {
+                          HijriCalendar hijriDay = HijriCalendar.fromDate(day);
+                          String hijriMonth = cubit.getArabicMonthName(
+                              HijriCalendar.fromDate(day).hMonth);
+
+                          cubit.changeDate(hijriDay.hDay.toString(), hijriMonth, hijriDay.hYear.toString(),);
+
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 5),
+                            padding: const EdgeInsets.all(2),
+                            height: 80,
+                            width: 80,
+                            decoration: BoxDecoration(
+                              color: Colors.green.shade400,
+                              shape: BoxShape.circle,
+                            ),
                             child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(day.day.toString()),
+                                Text(day.day.toString(),
+                                  style:const TextStyle(
+                                      fontSize: 17
+                                  ),),
                                 Text(
                                   hijriDay.hDay == 1
                                       ? hijriMonth.toString().toString()
                                       : hijriDay.hDay.toString(),
-                                  style: const TextStyle(
-                                      fontSize: 6, color: Colors.grey),
+                                  style:  TextStyle(
+                                      fontSize:hijriDay.hDay == 1? 8: 11,
+                                      color: Colors.black),
                                 ),
                               ],
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                        todayBuilder: (BuildContext, day, DateToday) {
+                          HijriCalendar hijriDay = HijriCalendar.fromDate(day);
+                          String hijriMonth = cubit.getArabicMonthName(
+                              HijriCalendar.fromDate(day).hMonth);
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 2),
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Column(
+                                children: [
+                                  Text(day.day.toString(),
+                                    style:const TextStyle(
+                                        fontSize: 17
+                                    ),),
+                                  Text(
+                                    hijriDay.hDay == 1
+                                        ? hijriMonth.toString()
+                                        : hijriDay.hDay.toString(),
+                                    style:  TextStyle(
+                                        fontSize:hijriDay.hDay == 1? 6: 10, color: Colors.black45),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        defaultBuilder: (BuildContext, day, DateToday) {
+                          HijriCalendar hijriDay = HijriCalendar.fromDate(day);
+                          String hijriMonth = cubit.getArabicMonthName(
+                              HijriCalendar.fromDate(day).hMonth);
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 2),
+                            child: Padding(
+                              padding: const EdgeInsets.all(2),
+                              child: Column(
+                                children: [
+                                  Text(day.day.toString(),
+                                    style:const TextStyle(
+                                        fontSize: 17
+                                    ),
+                                  ),
+                                  Text(
+                                    hijriDay.hDay == 1
+                                        ? hijriMonth.toString().toString()
+                                        : hijriDay.hDay.toString(),
+                                    style:  TextStyle(
+                                        fontSize:hijriDay.hDay == 1? 8: 10
+                                        , color: Colors.grey),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
                   const SizedBox(
@@ -194,7 +210,6 @@ class _TableComplexState extends State<TableComplex> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-
                       // change hijri date
                       cubit.unselectableDays.add(DateTime(
                         cubit.selectedDay.year,
@@ -203,21 +218,21 @@ class _TableComplexState extends State<TableComplex> {
                       ));
 
                       // post data
-                      ApiService().postDataToApi(
-                        data: {
-                          "hall_id": 600001,
-                          "customer_id": 1,
-                          "booking_date": DateTime(cubit.selectedDay.year,
-                            cubit.selectedDay.month,
-                            cubit.selectedDay.day,).toString(),
-                        }
-                      );
+                      ApiService().postDataToApi(data: {
+                        "hall_id": 600001,
+                        "customer_id": 1,
+                        "booking_date": DateTime(
+                          cubit.selectedDay.year,
+                          cubit.selectedDay.month,
+                          cubit.selectedDay.day,
+                        ).toString(),
+                      });
 
                       // change un available dates
                       cubit.changeUnSelected();
 
-                      Navigator.of(context).push(MaterialPageRoute(builder: (_)=>const SecondScreen()));
-
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const SecondScreen()));
                     },
                     child: Text(
                       'حجز بتاريخ ${cubit.day} ${cubit.month}, ${cubit.year}',
