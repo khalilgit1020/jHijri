@@ -195,7 +195,8 @@ class _TableComplexState extends State<TableComplex> {
                                         : hijriDay.hDay.toString(),
                                     style:  TextStyle(
                                         fontSize:hijriDay.hDay == 1? 8: 10
-                                        , color: Colors.grey),
+                                        , color: Colors.grey,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -211,23 +212,16 @@ class _TableComplexState extends State<TableComplex> {
                   ElevatedButton(
                     onPressed: () {
                       // change hijri date
-                      cubit.unselectableDays.add(DateTime(
-                        cubit.selectedDay.year,
-                        cubit.selectedDay.month,
-                        cubit.selectedDay.day,
-                      ));
+                      cubit.unselectableDays.add(DateFormat('yyyy/MM/dd').format(cubit.selectedDay));
 
                       // post data
                       ApiService().postDataToApi(data: {
                         "hall_id": 600001,
                         "customer_id": 1,
-                        "booking_date": DateTime(
-                          cubit.selectedDay.year,
-                          cubit.selectedDay.month,
-                          cubit.selectedDay.day,
-                        ).toString(),
+                        "booking_date": DateFormat('yyyy/MM/dd').format(cubit.selectedDay).toString(),
                       });
 
+                      print(DateFormat('yyyy/MM/dd').format(cubit.selectedDay));
                       // change un available dates
                       cubit.changeUnSelected();
 
