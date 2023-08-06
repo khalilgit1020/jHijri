@@ -26,7 +26,7 @@ class HomeCubit extends Cubit<BlocStates> {
     day = d;
     month = m;
     year = y;
-    //emit(ChangeDateDetailsState());
+    emit(ChangeDateDetailsState());
   }
 
   late PageController pageController;
